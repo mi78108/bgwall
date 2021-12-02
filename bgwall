@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+# encoding:utf-8
+# -*- coding: UTF-8 -*-
+
+# 状态栏
+require 'fileutils'
+
+DURA = 30 * 60
+IMGS = 2
+FETCH = 'INDEX'
+VALS = { :INDEX_FETCH => 0, :COUNT_FETCH => 0 }
+
+IMG = '/tmp/bgwall/'
+FSC = './fetch_script/'
+PSC = './post_script/'
+CBG = "#{IMG}/bgwall_current.png"
+NBG = "#{IMG}/bgwall_next.png"
+
+
+def call_bg_script(script,img_dir, count)
+  return nil if script.nil?
+  file = `#{script[0]} #{img_dir}/#{script[1]}_#{count} #{count}`.chomp
+  puts ">>> bg [#{file}] fetch by #{script[1]}"
+  return file
+end
+
+def call_post_script(img_path)
+  Dir::open(PSC).filter{|f| f.start_with? /\d+/ and File.executable? PSC + f }.sort.map{|v| [PSC + v, v] }.each_with_index do |script,index|
+    nName = "#{IMG}#{index}_#{File.basename(img_path)}"
+    FileUtils.copy_file img_path, nName
+    system("#{script[0]} #{img_path} #{nName}")
+    img_path = nName
+  end
+  return img_path
+end
+
+def get_background_image(fetch_type)
+  VALS[:COUNT_FETCH] += 1
+  fsca = Dir::open(FSC).filter{|f| f.start_with? /\d+/ and File.executable? FSC + f }.sort.map{|v| [FSC + v, v] }
+  return nil if fsca.empty?
+  call_bg_script case fetch_type
+when 'RANDOM'
+  fsca[ rand fsca.size ]
+when 'INDEX'
+  VALS[:INDEX_FETCH] += 1
+  fsca[ VALS[:INDEX_FETCH] % fsca.size ]
+else
+  fsca[ rand fsca.size ]
+end, IMG, VALS[:COUNT_FETCH]
+end
+
+def set_background_image(img_path)
+  #system("hsetroot -fill #{img_path}")
+  puts ">>> set background #{img_path} [#{Time.now}]\n\n"
+  system("feh --bg-scale #{img_path}")
+end
+
+
+
+`[[ -d #{IMG} ]] || mkdir #{IMG}; echo $(date) > #{PSC}/start && echo $(date) > #{FSC}/start; sleep 2`
+
+Thread::new do
+  loop do
+    if Time.now.sec == 00
+      next if not File.exist? CBG
+      if File.exist? NBG
+        set_background_image NBG
+      else
+        set_background_image CBG
+      end
+      post_bg = call_post_script CBG
+      FileUtils.copy_file post_bg, NBG
+    end
+    sleep 1
+  end
+end
+
+
+loop do 
+  sleep 7 if Time.now.sec == 00
+  file = get_background_image FETCH
+  FileUtils.copy_file file, CBG if not file.nil?
+  next if not File.exist? CBG
+
+  sleep DURA
+end
+
