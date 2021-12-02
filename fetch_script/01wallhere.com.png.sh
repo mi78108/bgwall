@@ -11,5 +11,5 @@ data_id=$(curl $base_page | jq .data | sed  -e 's/\\r\\n//g' -e 's/\\//g' | grep
 img_url="https://wallhere.com/zh/wallpaper/$data_id"
 img_src=$(curl $img_url | grep current-page-photo | grep -Po '(?<=href\=")(.*?)(?=")')
 
-wget $img_src -O $1.jpg
-echo $1.jpg
+wget $img_src -O $1
+echo $1
