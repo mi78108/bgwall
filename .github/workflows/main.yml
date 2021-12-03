@@ -20,9 +20,23 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: 安装依赖项并进行环境变量配置
+        run: sudo apt -y install cargo rust
+      
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: cargo build --release
+        
+      - name: 发布到 github
+        if: ${{ github.event_name == 'push' }}
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ env.ReleaseVersion }}"
+          prerelease: false
+          title: "${{ env.ReleaseVersion }}"
+          files: |
+            target/release/*
