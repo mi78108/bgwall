@@ -23,7 +23,7 @@ jobs:
       - name: 安装依赖项并进行环境变量配置
         run: |
           sudo apt update
-          sudo apt -y install cargo rust
+          sudo apt -y install cargo rustc
       
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
