@@ -1,8 +1,6 @@
-#[macro_use]
 use lazy_static;
-use std::{time::{Duration, SystemTime, UNIX_EPOCH}, thread, process::{Command, ExitStatus}, ops::Add, fs::{ReadDir, DirEntry}, os::unix::prelude::MetadataExt, path::{Path, PathBuf}, fmt::Error, collections::HashMap, cell::RefCell, sync::{Arc, RwLock}, rc::Rc, borrow::{BorrowMut, Borrow}};
+use std::{time::{Duration, SystemTime, UNIX_EPOCH}, thread, process::Command, ops::Add, fs::DirEntry, os::unix::prelude::MetadataExt, path::Path, collections::HashMap, sync::RwLock,borrow::Borrow};
 use std::env::Args;
-use std::panic::panic_any;
 use std::process::exit;
 
 
