@@ -20,7 +20,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: 安装依赖项并进行环境变量配置
+      - name: 安装 Cargo, Rust
         run: |
           sudo apt update
           sudo apt -y install cargo rustc
@@ -32,13 +32,13 @@ jobs:
       - name: Cargo 编译
         run: cargo build --release
         
-      - name: 发布到 github
+      - name: 发布到 GITHUB
         if: ${{ github.event_name == 'push' }}
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          # automatic_release_tag: "latest"
           prerelease: false
           title: "Development Build"
           files: |
-            target/release/*
+            target/release/bgwall
