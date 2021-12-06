@@ -1,11 +1,10 @@
 use lazy_static;
-use std::{time::{Duration, SystemTime, UNIX_EPOCH}, thread, process::Command, ops::Add, fs::DirEntry, os::unix::prelude::MetadataExt, path::Path, collections::HashMap, sync::RwLock,borrow::Borrow};
+use std::{time::{Duration, SystemTime, UNIX_EPOCH}, thread, process::Command, ops::Add, fs::{DirEntry, DirBuilder, self}, os::unix::prelude::MetadataExt, path::Path, collections::HashMap, sync::RwLock,borrow::Borrow};
 use std::env::Args;
 use std::process::exit;
 
-
 fn download_image() -> String {
-    let mut _d_img = IMG_DIR.to_string().add("/");
+    
     if let Some(scripts) = Path::new(&(*FETCH_SCRIPT_DIR)).get_exec_script() {
         let index = (|| {
             if let Ok(read) = VALS.read() {
@@ -87,12 +86,19 @@ fn set_background(img_path: String) {
     if let Ok(mut child) = Command::new("feh").arg("--bg-scale").arg(img_path.as_str()).spawn() {
         if let Ok(state) = child.wait() {
             if state.success(){
-                format!("设置壁纸 [{}] 成功",img_path).as_str().to_log();
+                format!("设置壁纸完毕 [{}] 成功\n\n",img_path).as_str().to_log();
                 return;
             }
         }
     }
-    format!("设置壁纸 [{}] 失败",img_path).as_str().to_log();
+    format!("设置壁纸完毕 [{}] 失败\n\n",img_path).as_str().to_log();
+    // unsafe {
+    //     if set_background_x11(CString::new(img_path.as_str()).unwrap()) == 0 {
+    //         format!("设置壁纸完毕 [{}] 成功\n\n", img_path).as_str().to_log();
+    //         return;
+    //     }
+    // }
+    //  format!("设置壁纸完毕 [{}] 失败\n\n",img_path).as_str().to_log();
 }
 
 fn change_background() {
@@ -148,6 +154,12 @@ lazy_static::lazy_static! {
 
 
 fn main() {
+
+    let _img_dir = Path::new(IMG_DIR.as_str());
+    if ! _img_dir.exists(){
+        fs::create_dir_all(_img_dir).expect("图片目录创建失败");
+    }
+
     let mut _download = std::thread::spawn(move || {
         loop {
             let download_img = download_image();
