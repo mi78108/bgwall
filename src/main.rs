@@ -4,7 +4,7 @@ use std::env::Args;
 use std::process::exit;
 
 fn download_image() -> String {
-    
+    let mut _d_img = IMG_DIR.to_string().add("/");
     if let Some(scripts) = Path::new(&(*FETCH_SCRIPT_DIR)).get_exec_script() {
         let index = (|| {
             if let Ok(read) = VALS.read() {
